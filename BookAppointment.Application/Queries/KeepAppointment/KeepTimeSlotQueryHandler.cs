@@ -18,16 +18,11 @@ namespace BookAppointment.Application.Queries.KeepAppointment
         {
             var appointmentToBook = await _appointmentRepository.GetAppointmentsByTimeAsync(keepTimeSlotQuery.BookingDate, keepTimeSlotQuery.BookingTime);
             var currentDate = keepTimeSlotQuery.BookingDate;
-            appointmentToBook.ToList().ForEach(appointment =>
+            
+            while (appointmentToBook.Any(appointment => appointment.BookingDate == currentDate))
             {
-                if (appointment.BookingDate != currentDate){
-                    return;
-                }
-                else{
-                    currentDate = currentDate.AddDays(1);
-                }
-            });
-
+                currentDate = currentDate.AddDays(1);
+            }
             var newAppointment = new Appointment
             {
                 BookingId = Guid.NewGuid(),

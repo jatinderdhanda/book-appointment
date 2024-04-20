@@ -21,23 +21,25 @@ namespace BookAppointment.Application.Queries.FindAppointment
             {
                 return null;
             }
+
+            // Define working hours
             var startTime = selectedDate.Date.AddHours(9); // Start at 9 AM
             var endTime = selectedDate.Date.AddHours(17); // End at 5 PM
-            int weekOfMonth = (selectedDate.Day - 1) / 7 + 1;
+
+            // Define the constraint for the third week of the month
+            var weekOfMonth = (selectedDate.Day - 1) / 7 + 1;
+            var isThirdWeekTuesday = weekOfMonth == 3 && selectedDate.DayOfWeek == DayOfWeek.Tuesday;
 
             while (startTime < endTime)
             {
-                if (weekOfMonth == 3 && selectedDate.DayOfWeek == DayOfWeek.Tuesday)
+                // Check if the time slot is within the constrained time (4 PM to 5 PM on Tuesday in the third week)
+                if (!isThirdWeekTuesday || !(startTime.Hour == 16 && startTime.Minute == 0))
                 {
-                    if (startTime.Hour == 16 && startTime.Minute == 0)
+                    // Check if the current time slot is available
+                    if (!existingAppointments.Any(bookedSlot => bookedSlot == startTime.TimeOfDay))
                     {
-                        return null;
+                        return startTime;
                     }
-                }
-                // Check if the current time slot is available
-                if (!existingAppointments.Any(bookedSlot => bookedSlot == startTime.TimeOfDay))
-                {
-                    return startTime;
                 }
 
                 // Move to the next time slot (30-minute interval)
