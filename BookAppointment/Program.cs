@@ -19,7 +19,11 @@ public static class Program
 
         while (true)
         {
-            Console.WriteLine("Enter a command (ADD, DELETE, FIND, KEEP) or 'EXIT' to quit:");
+            Console.WriteLine("Usage:");
+            Console.WriteLine("ADD DD/MM hh:mm - Add an appointment");
+            Console.WriteLine("DELETE DD/MM hh:mm - Remove an appointment");
+            Console.WriteLine("FIND DD/MM - Find a free timeslot for the day");
+            Console.WriteLine("KEEP hh:mm - Keep a timeslot for any day");
             string input = Console.ReadLine().Trim().ToUpper();
 
             if (input == "EXIT")
@@ -28,7 +32,7 @@ public static class Program
             }
 
             string[] commandParts = input.Split(' ');
-            string commandType = commandParts[0];
+            string commandType = commandParts.FirstOrDefault();
 
             switch (commandType)
             {
