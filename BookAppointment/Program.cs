@@ -36,20 +36,20 @@ public static class Program
 
             switch (commandType)
             {
-                case "ADD":
+                case Constants.AddCommand:
                     await ProgramExtension.ProcessAddCommand(commandParts, mediator);
                     break;
-                case "DELETE":
+                case Constants.DeleteCommand:
                     await ProgramExtension.ProcessDeleteCommand(commandParts, mediator);
                     break;
-                case "FIND":
+                case Constants.FindCommand:
                     await ProgramExtension.ProcessFindCommand(commandParts, mediator);
                     break;
-                case "KEEP":
+                case Constants.KeepCommand:
                     await ProgramExtension.ProcessKeepCommand(commandParts, mediator);
                     break;
                 default:
-                    Console.WriteLine("Invalid command. Please try again.");
+                    Console.WriteLine(Constants.InvalidCommandErrorMessage);
                     break;
             }
         }

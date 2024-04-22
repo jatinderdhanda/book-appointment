@@ -19,7 +19,7 @@ namespace BookAppointment.UnitTest
         }
 
         [Fact]
-        public async Task Handle_AppointmentsDoesnnotExist_ReturnsNull()
+        public async Task Handle_AppointmentsDoesNotExist_ReturnsOk()
         {
             //Arrange
             var query = _fixture.Create<FindFreeTimeSlotQuery>();
@@ -29,7 +29,7 @@ namespace BookAppointment.UnitTest
             var result = await _handler.Handle(query, CancellationToken.None);
 
             //Assert
-            result.Should().BeNull();
+            result.Should().NotBeNull();
         }
 
         [Fact]

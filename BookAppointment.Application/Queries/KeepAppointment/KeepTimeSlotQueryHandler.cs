@@ -30,7 +30,7 @@ namespace BookAppointment.Application.Queries.KeepAppointment
                 BookingTime = keepTimeSlotQuery.BookingTime
             };
             await _appointmentRepository.AddAppointment(newAppointment);
-            return currentDate;
+            return new DateTime(currentDate.Year, currentDate.Month,currentDate.Day, keepTimeSlotQuery.BookingTime.Hours, keepTimeSlotQuery.BookingTime.Minutes,0);
         }
     }
 }

@@ -15,15 +15,27 @@ namespace BookAppointment.Infrastructure.Commands.AddApponitment
         public async Task<bool> Handle(AddAppointmentCommand command,
         CancellationToken cancellationToken)
         {
-            var appointment = new Appointment
+            var existingAppointment = await _appointmentRepository.GetAppointments(command.BookingDate);
+            var result = true;
+            existingAppointment.ToList().ForEach(bookingTime =>
             {
-                BookingId = Guid.NewGuid(),
-                BookingDate = command.BookingDate,
-                BookingTime = command.BookingTime
-            };
-
-            await _appointmentRepository.AddAppointment(appointment);
-            return true;
+                if(bookingTime <= command.BookingTime && bookingTime.Add(TimeSpan.FromMinutes(30)) > command.BookingTime)
+                {
+                    result = false;
+                    return;
+                }
+            });
+            if (result)
+            {
+                var appointment = new Appointment
+                {
+                    BookingId = Guid.NewGuid(),
+                    BookingDate = command.BookingDate,
+                    BookingTime = command.BookingTime
+                };
+                await _appointmentRepository.AddAppointment(appointment);
+            }
+            return result;
         }
     }
 }

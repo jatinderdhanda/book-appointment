@@ -24,7 +24,10 @@ namespace BookAppointment.UnitTest
         public async Task Handle_KeepTimeSlotShouldReturnCurrentBookingDate()
         {
             //Arrange
-            var query = _fixture.Create<KeepTimeSlotQuery>();
+            var currentDate = DateTime.UtcNow;
+            var modifiedDate = new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, 0, 0, 0);
+            var query = _fixture.Build<KeepTimeSlotQuery>()
+                .With(x => x.BookingDate, modifiedDate).Create();
             _appointmentRepository.GetAppointmentsByTimeAsync(Arg.Any<DateTime>(), Arg.Any<TimeSpan>()).Returns(new List<Appointment>());
 
             //Act

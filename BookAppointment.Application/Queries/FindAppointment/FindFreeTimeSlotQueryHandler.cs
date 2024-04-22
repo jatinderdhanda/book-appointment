@@ -17,11 +17,6 @@ namespace BookAppointment.Application.Queries.FindAppointment
             var selectedDate = query.BookingDate;
             var existingAppointments = await _appointmentRepository.GetAppointments(query.BookingDate);
 
-            if (!existingAppointments.Any())
-            {
-                return null;
-            }
-
             // Define working hours
             var startTime = selectedDate.Date.AddHours(9); // Start at 9 AM
             var endTime = selectedDate.Date.AddHours(17); // End at 5 PM

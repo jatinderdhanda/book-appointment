@@ -20,17 +20,17 @@ namespace BookAppointment.UnitTest
         }
 
         [Fact]
-        public async Task Handle_AppointmentDoesnnotExist_ThrowsException()
+        public async Task Handle_AppointmentDoesNotExist_ThrowsException()
         {
             //Arrange
             var command = _fixture.Create<DeleteAppointmentCommand>();
             _ = _appointmentRepository.GetAppointmentAsync(Arg.Any<DateTime>(), Arg.Any<TimeSpan>()).ReturnsForAnyArgs((Appointment)null);
-            
-            //Act & Assert
-            await Assert.ThrowsAsync<Exception>(async () =>
-            {
-                await _handler.Handle(command, CancellationToken.None);
-            });
+
+            //Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            //Assert
+            result.Should().BeFalse();
         }
 
         [Fact]

@@ -16,10 +16,9 @@ namespace BookAppointment.Infrastructure.Commands.DeleteAppointment
             var appointmentToDelete = await _appointmentRepository.GetAppointmentAsync(command.BookingDate, command.BookingTime);
             if (appointmentToDelete == null)
             {
-                throw new Exception("Appoinment doesn't exist");
+                return false;
             }
-
-            await _appointmentRepository.RemoveAppointment(appointmentToDelete);
+            await _appointmentRepository.UpdateAppointmentAsync(appointmentToDelete);
             return true;
         }
     }

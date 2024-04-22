@@ -11,30 +11,50 @@ namespace BookAppointment
         {
 
             var bookingDateTime = GetBookingDateTime(commandParts);
-            if (bookingDateTime == null)
+            if (bookingDateTime == null || !CheckTimeIsInRange(bookingDateTime.Value.TimeOfDay) || CheckIfDateIsThirdWeekTuesday(bookingDateTime.Value.Date))
             {
+                Console.WriteLine(Constants.BookingSlotUnAvailable);
                 return;
             }
-            _ = await mediator.Send(new AddAppointmentCommand
+            var result = await mediator.Send(new AddAppointmentCommand
             {
                 BookingDate = bookingDateTime.Value.Date,
                 BookingTime = bookingDateTime.Value.TimeOfDay
             });
+
+            if (result)
+            {
+                Console.WriteLine(Constants.AddCommandSuccessMessage);
+            }
+            else
+            {
+                Console.WriteLine(Constants.FailedCommandMessage);
+            }
         }
 
         public static async Task ProcessDeleteCommand(string[] commandParts, IMediator mediator)
         {
 
             var bookingDateTime = GetBookingDateTime(commandParts);
-            if (bookingDateTime == null)
+            if (bookingDateTime == null || !CheckTimeIsInRange(bookingDateTime.Value.TimeOfDay))
             {
+                Console.WriteLine(Constants.BookingSlotUnAvailable);
                 return;
             }
-            _ = await mediator.Send(new DeleteAppointmentCommand
+            var result = await mediator.Send(new DeleteAppointmentCommand
             {
                 BookingDate = bookingDateTime.Value.Date,
                 BookingTime = bookingDateTime.Value.TimeOfDay
             });
+
+            if (result)
+            {
+            Console.WriteLine(Constants.DeleteCommandSuccessMessage);
+            }
+            else
+            {
+                Console.WriteLine(Constants.FailedCommandMessage);
+            }
         }
 
         public static async Task ProcessFindCommand(string[] commandParts, IMediator mediator)
@@ -43,22 +63,29 @@ namespace BookAppointment
             var bookingDateTime = GetBookingDateTime(commandParts);
             if (bookingDateTime == null)
             {
+                Console.WriteLine(Constants.BookingSlotUnAvailable);
                 return;
             }
             var result = await mediator.Send(new FindFreeTimeSlotQuery
             {
                 BookingDate = bookingDateTime.Value.Date
             });
-
-            Console.WriteLine("Next available free timeslot for the day is:" + result);
+            if (result != null)
+            {
+                Console.WriteLine(Constants.FindCommandSuccessMessage + result);
+            }
+            else {
+                Console.WriteLine(Constants.FindCommandErrorMessage);
+            }
         }
 
         public static async Task ProcessKeepCommand(string[] commandParts, IMediator mediator)
         {
 
             var bookingDateTime = GetBookingDateTime(commandParts);
-            if (bookingDateTime == null)
+            if (bookingDateTime == null || !CheckTimeIsInRange(bookingDateTime.Value.TimeOfDay))
             {
+                Console.WriteLine(Constants.BookingSlotUnAvailable);
                 return;
             }
             var result = await mediator.Send(new KeepTimeSlotQuery
@@ -67,7 +94,7 @@ namespace BookAppointment
                 BookingTime = bookingDateTime.Value.TimeOfDay
             });
 
-            Console.WriteLine("Next available free timeslot for the day is:" + result);
+            Console.WriteLine(Constants.KeepCommandSuccessMessage + result);
         }
 
         static DateTime? GetBookingDateTime(string[] commandParts)
@@ -77,11 +104,11 @@ namespace BookAppointment
             switch (commandType)
             {
 
-                case "ADD":
-                case "DELETE":
+                case Constants.AddCommand:
+                case Constants.DeleteCommand:
                     if (commandParts.Length != 3)
                     {
-                        Console.WriteLine("Invalid command format. Usage: ADD DD/MM hh:mm");
+                        Console.WriteLine(Constants.InvalidCommandFormatForAddDelete);
                         return null;
                     }
                     string dateTimeString = commandParts[1] + " " + commandParts[2];
@@ -91,13 +118,13 @@ namespace BookAppointment
                     }
                     else
                     {
-                        Console.WriteLine("Invalid date/time format. Usage: ADD DD/MM hh:mm");
+                        Console.WriteLine(Constants.InvalidDateTimeFormat);
                     }
                     return null;
-                case "FIND":
+                case Constants.FindCommand:
                     if (commandParts.Length != 2)
                     {
-                        Console.WriteLine("Invalid command format. Usage: FIND DD/MM");
+                        Console.WriteLine(Constants.InvalidCommandFormatForFind);
                         return null;
                     }
 
@@ -107,28 +134,42 @@ namespace BookAppointment
                     }
                     else
                     {
-                        Console.WriteLine("Invalid date format. Usage: FIND DD/MM");
+                        Console.WriteLine(Constants.InvalidDateFormat);
                     }
                     return null;
-                case "KEEP":
+                case Constants.KeepCommand:
 
                     if (commandParts.Length != 2)
                     {
-                        Console.WriteLine("Invalid command format. Usage: KEEP hh:mm");
+                        Console.WriteLine(Constants.InvalidCommandFormatForKeep);
                         return null;
                     }
 
-                    if (DateTime.TryParseExact(commandParts[1], "hh:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime selectedTime))
+                    if (DateTime.TryParseExact(commandParts[1], "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime selectedTime))
                     {
                         return selectedTime;
                     }
                     else
                     {
-                        Console.WriteLine("Invalid time format. Usage: KEEP hh:mm");
+                        Console.WriteLine(Constants.InvalidTimeFormat);
                     }
                     return null;
             }
             return null;
+        }
+
+        static bool CheckTimeIsInRange(TimeSpan bookingTime)
+        {
+            if(bookingTime.Hours<9) return false;
+            var modifiedTime = bookingTime.Add(TimeSpan.FromMinutes(30));
+            return modifiedTime.Hours >= 9 && modifiedTime.Hours < 17;
+            
+        }
+
+        static bool CheckIfDateIsThirdWeekTuesday(DateTime bookingDate)
+        {
+            var weekOfMonth = (bookingDate.Day - 1) / 7 + 1;
+            return  weekOfMonth == 3 && bookingDate.DayOfWeek == DayOfWeek.Tuesday;
         }
     }
 }

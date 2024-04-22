@@ -15,6 +15,7 @@ namespace BookAppointment.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Appointment>().HasQueryFilter(x => x.Status == Status.Active);
             modelBuilder.ApplyConfiguration(new AppointmentTypeConfiguration());
         }
     }
